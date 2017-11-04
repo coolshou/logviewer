@@ -258,7 +258,7 @@ class main(QMainWindow):
                     for column in range(self.twData.columnCount()):
                         item = self.twData.item(row, column)
                         if item is not None:
-                            rowdata.append(item.text())
+                            rowdata.append("%s" % item.text())
                         else:
                             rowdata.append('')
                     self.log.append("%s = %s" %(row, rowdata))
@@ -348,14 +348,14 @@ class main(QMainWindow):
             
         phase = self.cbPhase.currentText()
         rs = self._Proxy.setPathb_phase(phase)
-        self.log.append(rs)
+        self.log.append("testPathbPhase = %s" % rs)
     
     def testRateCtl(self):
         if not self._Proxy:
             self.connectServerProxy()
         rate = self.cbRateCtl.currentText()
         rs = self._Proxy.setRate_ctl(rate)
-        self.log.append(rs)
+        self.log.append("testRateCtl = %s" % rs)
         
     def setRate_ctl(self, rate):
         if not self._Proxy:
@@ -363,7 +363,11 @@ class main(QMainWindow):
         #echo 0x2C > /proc/net/rtl88x2bu/wlan3/rate_ctl ;cat /proc/net/rtl88x2bu/wlan3/rate_ctl
         path = self.leRateCtlPath.text()
         cmd = shlex.split('echo %s > %s ;cat %s' % (rate, path, path ))
-        rs = subprocess.call(cmd, stdout=subprocess.PIPE)
+        #cmd = shlex.split('ls -l')
+        try:
+            rs = subprocess.check_output(cmd)
+        except subprocess.CalledProcessError:
+            self.log.append('setRate_ctl Exception: %s' % cmd)
         return rs
         
     def setPathb_phase(self, phase):
@@ -373,7 +377,11 @@ class main(QMainWindow):
         rPath = self.leRateCtlPath.text()
         pPath = self.lePathbPhasePath.text()
         cmd = shlex.split('echo %s > %s ;cat %s; cat %s' % (phase, pPath, pPath, rPath ))
-        rs = subprocess.call(cmd, stdout=subprocess.PIPE)
+        self.log.append("%s" % cmd)
+        try:
+            rs = subprocess.check_output(cmd)
+        except subprocess.CalledProcessError:
+            self.log.append('setPathb_phase Exception: %s' % cmd)
         return rs
         
     def updateUIbtn(self, e):
