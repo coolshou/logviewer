@@ -15,7 +15,7 @@ import asyncio
 import subprocess
 import shlex
 from concurrent.futures import ThreadPoolExecutor
-io_pool_exc = ThreadPoolExecutor()
+io_pool_exc = ThreadPoolExecutor(max_workers=1)
 
 from PyQt5.QtCore import (QThread, pyqtSignal, pyqtSlot, QObject, QSettings)
 from PyQt5.QtWidgets import(QApplication, QMainWindow, QWidget,
