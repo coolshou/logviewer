@@ -20,7 +20,7 @@ io_pool_exc = ThreadPoolExecutor(max_workers=1)
 from PyQt5.QtCore import (QThread, pyqtSignal, pyqtSlot, QObject, QSettings)
 from PyQt5.QtWidgets import(QApplication, QMainWindow, QWidget,
                             QVBoxLayout, QPushButton, QTextEdit, QFileDialog,
-                            QTableWidgetItem)
+                            QTableWidgetItem, QMessageBox)
 from PyQt5.uic import loadUi
 import signal
 
@@ -173,6 +173,7 @@ class main(QMainWindow):
         self.pbStopThread.clicked.connect(self.abort_workers)
         #self.pbSetFilter.clicked.connect(self.setFilter)
         self.pbSaveData.clicked.connect(self.saveData)
+        self.pbClearData.clicked.connect(self.clearData)
         self.leFilter.editingFinished.connect(self.setFilter)
         self.leServerIP.editingFinished.connect(self.setServerIP)
         #
@@ -260,6 +261,12 @@ class main(QMainWindow):
             else:
                 self.log.append(m)
                 
+    def clearData(self):
+        btnReply = QMessageBox.question(self, 'Notice', "All data will be delete, continus?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if btnReply == QMessageBox.Yes:
+            print('Yes clicked.')
+            self.twData.clearContents()
+            
     def saveData(self):
         filename , _filter = QFileDialog.getSaveFileName(
                 self, 'Save File', '', 'CSV(*.csv)')
@@ -402,7 +409,6 @@ class main(QMainWindow):
         
     def setPathb_phase(self, phase):
         #echo 0 > /proc/net/rtl88x2bu/wlan3/pathb_phase; cat /proc/net/rtl88x2bu/wlan3/pathb_phase ;cat /proc/net/rtl88x2bu/wlan3/rate_ctl
-        #rPath = self.leRateCtlPath.text()
         pPath = self.lePathbPhasePath.text()
         f = open(pPath,'w')
         print("write %s with %s " %(pPath, phase))
