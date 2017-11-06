@@ -183,6 +183,7 @@ class main(QMainWindow):
         self.__threads = None
     
         self.__sFilter = ''
+        self.__ServerIP = ''
         
         self.ifound = 0
         self.currentPhase = 0
@@ -351,7 +352,7 @@ class main(QMainWindow):
     def connectServerProxy(self):
         try:
             print("connectServerProxy")
-            self._Proxy = ServerProxy('http://%s:%s' %(self.leServerIP.text(), self.sbPort.value())) 
+            self._Proxy = ServerProxy('http://%s:%s' %(self.__ServerIP, self.sbPort.value())) 
             print("connectServerProxy: %s" % self._Proxy)
         except Exception as err:
             print("A fault occurred: %s" % type(err))
@@ -378,8 +379,6 @@ class main(QMainWindow):
         self.log.append("testRateCtl = %s" % rs)
         
     def setRate_ctl(self, rate):
-        if not self._Proxy:
-            self.connectServerProxy()       
         #echo 0x2C > /proc/net/rtl88x2bu/wlan3/rate_ctl ;cat /proc/net/rtl88x2bu/wlan3/rate_ctl
         path = self.leRateCtlPath.text()
         cmd = shlex.split('echo %s > %s; cat %s' % (rate, path, path ))
@@ -392,8 +391,6 @@ class main(QMainWindow):
         return rs
         
     def setPathb_phase(self, phase):
-        if not self._Proxy:
-            self.connectServerProxy()       
         #echo 0 > /proc/net/rtl88x2bu/wlan3/pathb_phase; cat /proc/net/rtl88x2bu/wlan3/pathb_phase ;cat /proc/net/rtl88x2bu/wlan3/rate_ctl
         rPath = self.leRateCtlPath.text()
         pPath = self.lePathbPhasePath.text()
