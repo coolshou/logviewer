@@ -27,6 +27,7 @@ import signal
 from threading import Thread
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.client import ServerProxy
+import xmlrpc
 
 def trap_exc_during_debug(*args):
     # when app raises uncaught exception, print info
@@ -173,6 +174,7 @@ class main(QMainWindow):
         #self.pbSetFilter.clicked.connect(self.setFilter)
         self.pbSaveData.clicked.connect(self.saveData)
         self.leFilter.editingFinished.connect(self.setFilter)
+        self.leServerIP.editingFinished.connect(self.setServerIP)
         #
 
         
@@ -198,8 +200,9 @@ class main(QMainWindow):
     def loadSetting(self):
         setting = self.settings
         self.syslogfile= setting.value("sourcefile", os.path.join("/","var","log","syslog"))
-        self.__sFilter = setting.value("filter", "yy")
-    
+        self.__sFilter = setting.value("filter", "sumall")
+        self.__ServerIP = setting.value("ServerIP", "127.0.0.1")
+
         self.setUI()
         
     def saveExit(self):
@@ -210,16 +213,23 @@ class main(QMainWindow):
         setting = self.settings
         setting.setValue("sourcefile", self.syslogfile)
         setting.setValue("filter", self.__sFilter)
+        setting.setValue("ServerIP", self.__ServerIP)
         
     def setUI(self):
         self.leSourceFile.setText(self.syslogfile)
         self.leFilter.setText(self.__sFilter)
+        self.leServerIP.setText(self.__ServerIP)
         
     @pyqtSlot()    
     def setFilter(self):
         t = self.leFilter.text()
         self.__sFilter = t
-            
+    
+    @pyqtSlot()          
+    def setServerIP(self):
+        t = self.leServerIP.text()
+        self.__ServerIP = t
+        
     @pyqtSlot(str)
     def logHandle(self, msg):
         if msg:
@@ -339,14 +349,24 @@ class main(QMainWindow):
         self.pbBind.setEnabled(False)
         
     def connectServerProxy(self):
-        self._Proxy = ServerProxy('http://%s:%s' %(self.leServerIP.text(), self.sbPort.value())) 
-        self.log.append("%s" % self._Proxy.system.listMethods())
+        try:
+            print("connectServerProxy")
+            self._Proxy = ServerProxy('http://%s:%s' %(self.leServerIP.text(), self.sbPort.value())) 
+            print("connectServerProxy: %s" % self._Proxy)
+        except Exception as err:
+            print("A fault occurred: %s" % type(err))
+            print(err)
+            #print("Fault code: %d" % err.faultCode)
+            #print("Fault string: %s" % err.faultString)
+        if self._Proxy:
+            self.log.append("%s" % self._Proxy.system.listMethods())
         
     def testPathbPhase(self):
         if not self._Proxy:
             self.connectServerProxy()
             
         phase = self.cbPhase.currentText()
+        self.log.append("set PathbPhase = %s" % phase)
         rs = self._Proxy.setPathb_phase(phase)
         self.log.append("testPathbPhase = %s" % rs)
     
@@ -368,7 +388,7 @@ class main(QMainWindow):
             rs = subprocess.check_output(cmd, 
                                          stderr=subprocess.STDOUT, shell=False)
         except subprocess.CalledProcessError:
-            self.log.append('setRate_ctl Exception: %s' % cmd)
+            print('setRate_ctl Exception: %s' % cmd)
         return rs
         
     def setPathb_phase(self, phase):
@@ -383,7 +403,7 @@ class main(QMainWindow):
             rs = subprocess.check_output(cmd,
                                          stderr=subprocess.STDOUT, shell=False)
         except subprocess.CalledProcessError:
-            self.log.append('setPathb_phase Exception: %s' % cmd)
+            print('setPathb_phase Exception: %s' % cmd)
         return rs
         
     def updateUIbtn(self, e):
