@@ -394,7 +394,8 @@ class main(QMainWindow):
         #echo 0 > /proc/net/rtl88x2bu/wlan3/pathb_phase; cat /proc/net/rtl88x2bu/wlan3/pathb_phase ;cat /proc/net/rtl88x2bu/wlan3/rate_ctl
         rPath = self.leRateCtlPath.text()
         pPath = self.lePathbPhasePath.text()
-        cmd = shlex.split('echo %s > %s; cat %s; cat %s' % (phase, pPath, pPath, rPath ))
+        #cmd = shlex.split('echo %s > %s; cat %s; cat %s' % (phase, pPath, pPath, rPath ))
+        cmd = shlex.split('echo %s > %s' % (phase, pPath))
         self.log.append("%s" % cmd)
         try:
             rs = subprocess.check_output(cmd,
