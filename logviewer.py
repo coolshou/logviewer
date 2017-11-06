@@ -404,8 +404,11 @@ class main(QMainWindow):
         try:
             rs = subprocess.check_output(cmd,
                                          stderr=subprocess.STDOUT, shell=False)
-        except subprocess.CalledProcessError:
-            print('setPathb_phase Exception: %s' % cmd)
+        #except subprocess.CalledProcessError:
+        #    print('setPathb_phase Exception: %s' % cmd)
+        except Exception as err:
+            print("A fault occurred: %s" % type(err))
+            print(err)
         print("setPathb_phase - 3")
         return rs
     
