@@ -365,7 +365,8 @@ class main(QMainWindow):
         cmd = shlex.split('echo %s > %s ;cat %s' % (rate, path, path ))
         #cmd = shlex.split('ls -l')
         try:
-            rs = subprocess.check_output(cmd)
+            rs = subprocess.check_output(cmd, 
+                                         stderr=subprocess.STDOUT, shell=True)
         except subprocess.CalledProcessError:
             self.log.append('setRate_ctl Exception: %s' % cmd)
         return rs
@@ -379,7 +380,8 @@ class main(QMainWindow):
         cmd = shlex.split('echo %s > %s ;cat %s; cat %s' % (phase, pPath, pPath, rPath ))
         self.log.append("%s" % cmd)
         try:
-            rs = subprocess.check_output(cmd)
+            rs = subprocess.check_output(cmd,
+                                         stderr=subprocess.STDOUT, shell=True)
         except subprocess.CalledProcessError:
             self.log.append('setPathb_phase Exception: %s' % cmd)
         return rs
