@@ -366,7 +366,7 @@ class main(QMainWindow):
         #cmd = shlex.split('ls -l')
         try:
             rs = subprocess.check_output(cmd, 
-                                         stderr=subprocess.STDOUT, shell=True)
+                                         stderr=subprocess.STDOUT, shell=False)
         except subprocess.CalledProcessError:
             self.log.append('setRate_ctl Exception: %s' % cmd)
         return rs
@@ -381,7 +381,7 @@ class main(QMainWindow):
         self.log.append("%s" % cmd)
         try:
             rs = subprocess.check_output(cmd,
-                                         stderr=subprocess.STDOUT, shell=True)
+                                         stderr=subprocess.STDOUT, shell=False)
         except subprocess.CalledProcessError:
             self.log.append('setPathb_phase Exception: %s' % cmd)
         return rs
