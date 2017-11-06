@@ -345,6 +345,7 @@ class main(QMainWindow):
             self.myService = myServiceServer(self.leServerIP.text(), self.sbPort.value())
             self.myService.register_function(self.setPathb_phase)
             self.myService.register_function(self.setRate_ctl)
+            self.myService.register_function(self.getPathb_phase)
             
         self.myService.start()
         self.pbBind.setEnabled(False)
