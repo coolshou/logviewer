@@ -400,7 +400,7 @@ class main(QMainWindow):
         #cmd = shlex.split('echo %s > %s; cat %s; cat %s' % (phase, pPath, pPath, rPath ))
         cmd = shlex.split('echo %s > %s' % (phase, pPath))
         #self.log.append("%s" % cmd)
-        print("setPathb_phase - 2")
+        print("setPathb_phase - 2: %s" % cmd)
         try:
             rs = subprocess.check_output(cmd,
                                          stderr=subprocess.STDOUT, shell=False)
