@@ -243,7 +243,10 @@ class main(QMainWindow):
                     pass
                 elif self.ifound <= self.iTotalCount:
                     self.log.append("%s================> %s" % (self.ifound, m))
-                    self.addData(self.ifound, m)
+                    #
+                    rs = m.split("kernel: ")
+                    if len(rs)==2:
+                        self.addData(self.ifound, rs[1])
                 else:
                     self.ifound = 0
                     self.currentPhase = self.currentPhase + 1
