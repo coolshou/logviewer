@@ -376,8 +376,10 @@ class main(QMainWindow):
     def testRateCtl(self):
         if not self._Proxy:
             self.connectServerProxy()
+            
         rate = self.cbRateCtl.currentText()
-        rs = self._Proxy.setRate_ctl(rate)
+        self._Proxy.setRate_ctl(rate)
+        rs = self._Proxy.getRate_ctl()
         self.log.append("testRateCtl = %s" % rs)
         
     def setRate_ctl(self, rate):
