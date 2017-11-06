@@ -395,8 +395,11 @@ class main(QMainWindow):
     def setPathb_phase(self, phase):
         #echo 0 > /proc/net/rtl88x2bu/wlan3/pathb_phase; cat /proc/net/rtl88x2bu/wlan3/pathb_phase ;cat /proc/net/rtl88x2bu/wlan3/rate_ctl
         #rPath = self.leRateCtlPath.text()
-        print("setPathb_phase - 1")
         pPath = self.lePathbPhasePath.text()
+        f = open(pPath,'w')
+        f.write('%s' % phase)
+        f.close()
+        '''
         #cmd = shlex.split('echo %s > %s; cat %s; cat %s' % (phase, pPath, pPath, rPath ))
         cmd = shlex.split('echo %s > %s' % (phase, pPath))
         #self.log.append("%s" % cmd)
@@ -411,6 +414,7 @@ class main(QMainWindow):
             print(err)
         print("setPathb_phase - 3")
         return rs
+        '''
     
     def getPathb_phase(self):
         #echo 0 > /proc/net/rtl88x2bu/wlan3/pathb_phase; cat /proc/net/rtl88x2bu/wlan3/pathb_phase ;cat /proc/net/rtl88x2bu/wlan3/rate_ctl
