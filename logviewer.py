@@ -367,9 +367,10 @@ class main(QMainWindow):
             self.connectServerProxy()
             
         phase = self.cbPhase.currentText()
-        self.log.append("set PathbPhase = %s" % phase)
-        rs = self._Proxy.setPathb_phase(phase)
-        self.log.append("testPathbPhase = %s" % rs)
+        self.log.append("set PathbPhase = %s (%s)" % (phase, type(phase)))
+        self._Proxy.setPathb_phase(phase)
+        rs = self._Proxy.getPathb_phase()
+        self.log.append("getPathb_phase = %s" % rs)
     
     def testRateCtl(self):
         if not self._Proxy:
@@ -396,14 +397,28 @@ class main(QMainWindow):
         pPath = self.lePathbPhasePath.text()
         #cmd = shlex.split('echo %s > %s; cat %s; cat %s' % (phase, pPath, pPath, rPath ))
         cmd = shlex.split('echo %s > %s' % (phase, pPath))
-        self.log.append("%s" % cmd)
+        #self.log.append("%s" % cmd)
         try:
             rs = subprocess.check_output(cmd,
                                          stderr=subprocess.STDOUT, shell=False)
         except subprocess.CalledProcessError:
             print('setPathb_phase Exception: %s' % cmd)
         return rs
-        
+    
+    def getPathb_phase(self):
+        #echo 0 > /proc/net/rtl88x2bu/wlan3/pathb_phase; cat /proc/net/rtl88x2bu/wlan3/pathb_phase ;cat /proc/net/rtl88x2bu/wlan3/rate_ctl
+        #rPath = self.leRateCtlPath.text()
+        pPath = self.lePathbPhasePath.text()
+        #cmd = shlex.split('echo %s > %s; cat %s; cat %s' % (phase, pPath, pPath, rPath ))
+        cmd = shlex.split('cat %s ' % (pPath))
+        self.log.append("%s" % cmd)
+        try:
+            rs = subprocess.check_output(cmd,
+                                         stderr=subprocess.STDOUT, shell=False)
+        except subprocess.CalledProcessError:
+            print('setPathb_phase Exception: %s' % cmd)
+        return rs        
+    
     def updateUIbtn(self, e):
         self.pbStartThread.setEnabled(e)
         self.pbStopThread.setEnabled(not e)
