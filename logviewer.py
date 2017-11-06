@@ -383,14 +383,16 @@ class main(QMainWindow):
     def setRate_ctl(self, rate):
         #echo 0x2C > /proc/net/rtl88x2bu/wlan3/rate_ctl ;cat /proc/net/rtl88x2bu/wlan3/rate_ctl
         path = self.leRateCtlPath.text()
-        cmd = shlex.split('echo %s > %s; cat %s' % (rate, path, path ))
-        #cmd = shlex.split('ls -l')
-        try:
-            rs = subprocess.check_output(cmd, 
-                                         stderr=subprocess.STDOUT, shell=False)
-        except subprocess.CalledProcessError:
-            print('setRate_ctl Exception: %s' % cmd)
-        return rs
+        f = open(path,'w')
+        f.write('%s' % rate)
+        f.close()
+        
+    def getRate_ctl(self):
+        path = self.leRateCtlPath.text()
+        f = open(path,'r')
+        r = f.readline()
+        print("%s" % r)
+        f.close()
         
     def setPathb_phase(self, phase):
         #echo 0 > /proc/net/rtl88x2bu/wlan3/pathb_phase; cat /proc/net/rtl88x2bu/wlan3/pathb_phase ;cat /proc/net/rtl88x2bu/wlan3/rate_ctl
@@ -399,22 +401,6 @@ class main(QMainWindow):
         f = open(pPath,'w')
         f.write('%s' % phase)
         f.close()
-        '''
-        #cmd = shlex.split('echo %s > %s; cat %s; cat %s' % (phase, pPath, pPath, rPath ))
-        cmd = shlex.split('echo %s > %s' % (phase, pPath))
-        #self.log.append("%s" % cmd)
-        print("setPathb_phase - 2: %s" % cmd)
-        try:
-            rs = subprocess.check_output(cmd,
-                                         stderr=subprocess.STDOUT, shell=False)
-        #except subprocess.CalledProcessError:
-        #    print('setPathb_phase Exception: %s' % cmd)
-        except Exception as err:
-            print("A fault occurred: %s" % type(err))
-            print(err)
-        print("setPathb_phase - 3")
-        return rs
-        '''
     
     def getPathb_phase(self):
         #echo 0 > /proc/net/rtl88x2bu/wlan3/pathb_phase; cat /proc/net/rtl88x2bu/wlan3/pathb_phase ;cat /proc/net/rtl88x2bu/wlan3/rate_ctl
