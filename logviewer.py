@@ -395,15 +395,18 @@ class main(QMainWindow):
     def setPathb_phase(self, phase):
         #echo 0 > /proc/net/rtl88x2bu/wlan3/pathb_phase; cat /proc/net/rtl88x2bu/wlan3/pathb_phase ;cat /proc/net/rtl88x2bu/wlan3/rate_ctl
         #rPath = self.leRateCtlPath.text()
+        print("setPathb_phase - 1")
         pPath = self.lePathbPhasePath.text()
         #cmd = shlex.split('echo %s > %s; cat %s; cat %s' % (phase, pPath, pPath, rPath ))
         cmd = shlex.split('echo %s > %s' % (phase, pPath))
         #self.log.append("%s" % cmd)
+        print("setPathb_phase - 2")
         try:
             rs = subprocess.check_output(cmd,
                                          stderr=subprocess.STDOUT, shell=False)
         except subprocess.CalledProcessError:
             print('setPathb_phase Exception: %s' % cmd)
+        print("setPathb_phase - 3")
         return rs
     
     def getPathb_phase(self):
