@@ -248,7 +248,11 @@ class main(QMainWindow):
                     self.currentPhase = self.currentPhase + 1
                     #TODO: issue command
                     if self.currentPhase < len(self.phase):
+                        print("current phase %s" % self.currentPhase)
+                        if not self._Proxy:
+                            self.connectServerProxy()
                         if self._Proxy:
+                            print("send phase to proxy: %s" % self.phase[self.currentPhase])
                             self._Proxy.setPathb_phase(self.phase[self.currentPhase])
                     else:
                         self.abort_workers()
@@ -401,6 +405,7 @@ class main(QMainWindow):
         #rPath = self.leRateCtlPath.text()
         pPath = self.lePathbPhasePath.text()
         f = open(pPath,'w')
+        print("write %s with %s " %(pPath, phase))
         f.write('%s' % phase)
         f.close()
     
