@@ -8,8 +8,8 @@ Created on Thu Oct 19 22:30:31 2017
 import sys
 import os
 import csv
-#import fcntl
-import time
+
+from datetime import datetime
 import asyncio
 #import aiofiles
 import subprocess
@@ -18,16 +18,16 @@ from concurrent.futures import ThreadPoolExecutor
 io_pool_exc = ThreadPoolExecutor(max_workers=1)
 
 from PyQt5.QtCore import (QThread, pyqtSignal, pyqtSlot, QObject, QSettings)
-from PyQt5.QtWidgets import(QApplication, QMainWindow, QWidget,
-                            QVBoxLayout, QPushButton, QTextEdit, QFileDialog,
-                            QTableWidgetItem, QMessageBox)
+from PyQt5.QtWidgets import(QApplication, QMainWindow, QFileDialog,
+                            QTableWidgetItem, QMessageBox, QHeaderView)
+#QWidget, QVBoxLayout, QPushButton, QTextEdit, 
 from PyQt5.uic import loadUi
 import signal
 
 from threading import Thread
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.client import ServerProxy
-import xmlrpc
+#import xmlrpc
 
 def trap_exc_during_debug(*args):
     # when app raises uncaught exception, print info
@@ -160,8 +160,16 @@ class main(QMainWindow):
         loadUi("logviewer.ui", self)
         
         self.setWindowTitle("Thread logviewer")
+        #UI
+        header = self.twData.horizontalHeader()
+        header.setStretchLastSection(True)
+        #pyqsetResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        #header.setSectionResizeMode(2, QHeaderView.Stretch)
         #
         self.myService = None
+        #
         self.pbBind.clicked.connect(self.startServer)
         self.pbTestPathbPhase.clicked.connect(self.testPathbPhase)
         self.pbTestRateCtl.clicked.connect(self.testRateCtl)
@@ -169,9 +177,7 @@ class main(QMainWindow):
         self.actionExit.triggered.connect(self.saveExit)
         self.pbSelectSource.clicked.connect(self.selectSource)
         self.pbStartThread.clicked.connect(self.start_threads)
-        #self.pbStartThread.setText("Start {} threads".format(self.NUM_THREADS))
         self.pbStopThread.clicked.connect(self.abort_workers)
-        #self.pbSetFilter.clicked.connect(self.setFilter)
         self.pbSaveData.clicked.connect(self.saveData)
         self.pbClearData.clicked.connect(self.clearData)
         self.leFilter.editingFinished.connect(self.setFilter)
@@ -250,7 +256,7 @@ class main(QMainWindow):
                 else:
                     self.ifound = 0
                     self.currentPhase = self.currentPhase + 1
-                    #TODO: issue command
+                    # issue command to xmlrpcserver (_Proxy)
                     if self.currentPhase < len(self.phase):
                         print("current phase %s" % self.currentPhase)
                         if not self._Proxy:
@@ -267,8 +273,8 @@ class main(QMainWindow):
     def clearData(self):
         btnReply = QMessageBox.question(self, 'Notice', "All data will be delete, continus?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if btnReply == QMessageBox.Yes:
-            print('Yes clicked.')
             self.twData.clearContents()
+            self.twData.setRowCount(0)
             
     def saveData(self):
         filename , _filter = QFileDialog.getSaveFileName(
@@ -313,7 +319,31 @@ class main(QMainWindow):
                                                   "All Files (*)", options=options)
         if fileName:
             self.leSourceFile.setText(fileName)
-            
+    
+    def startRsyslog(self, act):
+        
+        if act:
+            #start
+            cmd = shlex.split("sudo service rsyslog start")
+        else:
+            cmd = shlex.split("sudo service rsyslog stop")
+        rs = ""
+        try:
+            rs = subprocess.check_output(cmd,
+                                         stderr=subprocess.STDOUT, shell=False)
+        except subprocess.CalledProcessError:
+            print('startRsyslog Exception: %s' % cmd)
+        return rs
+        
+    def reInitRsyslog(self):
+        #stop rsyslog
+        self.startRsyslog(False)
+        #backup /var/log/syslog
+        bakFile =datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        os.rename(self.syslogfile, "%s_%s" %(self.syslogfile, bakFile))
+        #start rsyslog
+        self.startRsyslog(True)
+        
     @pyqtSlot()
     def start_threads(self):
         self.log.append('starting {} threads'.format(self.NUM_THREADS))
@@ -324,7 +354,8 @@ class main(QMainWindow):
         self.ifound = 0
         self.iIgnore = self.sbIgnore.value()
         self.iTotalCount = self.sbCount.value() + self.iIgnore
-        
+        #re-init rsyslog : clear previous result!
+        self.reInitRsyslog()
         self.__workers_done = 0
         self.__threads = []
         for idx in range(self.NUM_THREADS):
@@ -465,6 +496,12 @@ class main(QMainWindow):
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    #check root
+    if not os.geteuid() == 0:
+        msg = "Please run as root or by sudo!!"
+        QMessageBox.question(None, 'Error', msg, QMessageBox.Ok , QMessageBox.Ok)
+        sys.exit(msg)
+
     m = main()
     m.show()
     sys.exit(app.exec_())
