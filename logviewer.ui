@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget_2">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tabServer">
        <attribute name="title">
@@ -52,6 +52,13 @@
              </property>
              <property name="text">
               <string>Stop</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbDirectBF">
+             <property name="text">
+              <string>DirectBF</string>
              </property>
             </widget>
            </item>
@@ -438,6 +445,71 @@
          </widget>
         </item>
         <item>
+         <widget class="QWidget" name="widget_6" native="true">
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="3" column="1">
+            <widget class="QLineEdit" name="leRateSearchResult">
+             <property name="text">
+              <string>/proc/net/rtl88x2bu/wlan3/rate_search_result</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLabel" name="lbRateSearch">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_10">
+             <property name="text">
+              <string>rate_search_result:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="leRateSearch">
+             <property name="text">
+              <string>/proc/net/rtl88x2bu/wlan3/rate_search</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>rate_search:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QPushButton" name="pbSingelTrigger">
+             <property name="text">
+              <string>Trigger</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QPushButton" name="pbGetRate">
+             <property name="text">
+              <string>Get</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QTextEdit" name="teRateSearchResult"/>
+           </item>
+           <item row="3" column="2">
+            <widget class="QPushButton" name="pbGetRateSerachResult">
+             <property name="text">
+              <string>Get Result</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -452,6 +524,186 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tabAtt">
+       <attribute name="title">
+        <string>Page</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="QWidget" name="widget_8" native="true">
+          <layout class="QHBoxLayout" name="horizontalLayout_10">
+           <item>
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string>IP:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="leIP">
+             <property name="text">
+              <string>192.168.110.239</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_12">
+             <property name="text">
+              <string>Account:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="leUserName">
+             <property name="text">
+              <string>tld1</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_13">
+             <property name="text">
+              <string>Password:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lePassword">
+             <property name="text">
+              <string>123456</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QWidget" name="widget_7" native="true">
+          <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <item>
+            <widget class="QLineEdit" name="leRSSI">
+             <property name="text">
+              <string>/proc/net/rtl88x2bu/wlanx/alpha_rssi</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbEVPathSignal">
+             <property name="text">
+              <string>ev path signal</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbSaveEVPathSignal">
+             <property name="text">
+              <string>Save</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="twAtt">
+          <row>
+           <property name="text">
+            <string>1</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>2</string>
+           </property>
+          </row>
+          <column>
+           <property name="text">
+            <string>Att</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Start</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Stop</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Step</string>
+           </property>
+          </column>
+          <item row="0" column="1">
+           <property name="text">
+            <string>40</string>
+           </property>
+          </item>
+          <item row="0" column="2">
+           <property name="text">
+            <string>100</string>
+           </property>
+          </item>
+          <item row="0" column="3">
+           <property name="text">
+            <string>20</string>
+           </property>
+          </item>
+          <item row="1" column="1">
+           <property name="text">
+            <string>40</string>
+           </property>
+          </item>
+          <item row="1" column="2">
+           <property name="text">
+            <string>100</string>
+           </property>
+          </item>
+          <item row="1" column="3">
+           <property name="text">
+            <string>1</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="twSignal">
+          <column>
+           <property name="text">
+            <string>Att1</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Att2</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>RSSI 1</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>RSSI 2</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>SNR 1</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>SNR 2</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -462,7 +714,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>29</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

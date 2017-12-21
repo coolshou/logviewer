@@ -8,7 +8,8 @@ Created on Thu Oct 19 22:30:31 2017
 import sys
 import os
 import csv
-
+import platform
+import time
 from datetime import datetime
 import asyncio
 #import aiofiles
@@ -28,6 +29,13 @@ from threading import Thread
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.client import ServerProxy
 #import xmlrpc
+#for ssh, require paramiko
+import spur
+#att
+sys.path.append(os.path.join("..","attenuator"))
+#from attenuator import attenuator, quant
+from attenuator import attenuator
+
 
 def trap_exc_during_debug(*args):
     # when app raises uncaught exception, print info
@@ -160,6 +168,15 @@ class main(QMainWindow):
         loadUi("logviewer.ui", self)
         
         self.setWindowTitle("Thread logviewer")
+        
+        try:
+            self.att = attenuator(testMode=True)
+        except  Exception as e:
+            print("qRVR:%s" % str(e))
+        
+        if self.att:
+            self.devices = self.att.getDevInfo()
+            
         #UI
         header = self.twData.horizontalHeader()
         header.setStretchLastSection(True)
@@ -183,7 +200,8 @@ class main(QMainWindow):
         self.leFilter.editingFinished.connect(self.setFilter)
         self.leServerIP.editingFinished.connect(self.setServerIP)
         #
-
+        self.pbDirectBF.clicked.connect(self.startDirectBF)
+        self.pbEVPathSignal.clicked.connect(self.startEVPathSignal)
         
         QThread.currentThread().setObjectName('main')  # threads can be named, useful for log output
         self.__workers_done = None
@@ -343,6 +361,114 @@ class main(QMainWindow):
         os.rename(self.syslogfile, "%s_%s" %(self.syslogfile, bakFile))
         #start rsyslog
         self.startRsyslog(True)
+    
+    @pyqtSlot()
+    def startEVPathSignal(self):
+        #self.addSignalResult(1,1,"123")
+        #return
+        att1 = self.devices[0]
+        att2 = self.devices[1]
+        
+        ip = self.leIP.text()
+        username = self.leUserName.text()
+        password = self.lePassword.text()
+        shell = spur.SshShell(hostname=ip, username=username, password=password)
+        rssi_path = self.leRSSI.text()
+        
+        iRow = self.twAtt.rowCount()
+        if iRow == 2:
+            itm1 = self.twAtt.item(0,0)
+            if not itm1:
+                itm1 = QTableWidgetItem(att1)
+                itm1.setText(str(self.att.getSerialNumber(att1)))
+            self.twAtt.setItem(0, 0, itm1)
+            itm2 = self.twAtt.item(1,0)
+            if not itm2:
+                itm2 = QTableWidgetItem(att2)
+                itm2.setText(str(self.att.getSerialNumber(att2)))
+            self.twAtt.setItem(1, 0, itm2)
+            
+            att1Start = self.twAtt.item(0,1)
+            att1Stop = self.twAtt.item(0,2)
+            att1Step = self.twAtt.item(0,3)
+            #att2Start = self.twAtt.item(1,1)
+            att2Stop = self.twAtt.item(1,2)
+            att2Step = self.twAtt.item(1,3)
+            
+            
+            for vAtt1 in range(int(att1Start.text()), int(att1Stop.text()), int(att1Step.text())):
+                #set patha,
+                self.att.setValue(att1, "Attenuation", vAtt1)
+                att2Start = vAtt1
+                for vAtt2 in range(att2Start, int(att2Stop.text()), int(att2Step.text())):
+                    #set pathb
+                    self.att.setValue(att2, "Attenuation", vAtt2)
+                    #get RSSI,SNR 10 times
+                    for i in range(10):
+                        result=""
+                        with shell:
+                            print("cat %s" % rssi_path)
+                            #result = shell.run(["cat", rssi_path])
+                        print("%s - %s: %s" % (vAtt1, vAtt2, result))
+                        curRow = self.twSignal.rowCount()
+                        self.addSignalResult(curRow+1, 0, vAtt1)
+                        self.addSignalResult(curRow+1, 1, vAtt2)
+                        #RSSI1, RSSI2, SNR1, SNR2
+                        self.addSignalResult(curRow+1, 2, result)
+                        QApplication.processEvents()
+                        time.sleep(1) #wait 1 sec
+                    QApplication.processEvents()
+                QApplication.processEvents()
+                    
+    def addSignalResult(self, row, col, val):
+        iRow = self.twSignal.rowCount()
+        if iRow < row:
+            self.twSignal.setRowCount(row)
+            
+        itm = self.twSignal.item(row,col)
+        if not itm:
+            itm = QTableWidgetItem(0)
+            print("addSignalResult: %s = %s" % (itm,val))
+            itm.setText(str(val))
+        self.twSignal.setItem(row, col, itm)
+            
+    @pyqtSlot()
+    def startDirectBF(self):
+        '''test direct BF'''
+        shell = spur.SshShell(hostname="192.168.110.239", username="tld1", password="123456")
+        
+        #TODO: loop test?
+        with shell:
+            result = shell.run(["cat", "/proc/net/rtl88x2bu/wlan3/rate_search"])
+            print(result)
+            # 1. trigger rate search
+            result = shell.run(["echo","1",">", "/proc/net/rtl88x2bu/wlan3/rate_search"])
+            #start ping
+            process = shell.spawn(["sudo", "alpha_ping", "-n 1300", "192.168.0.20"],
+                               store_pid=True)
+            #wait finish search (2min)
+            '''
+            waittime=0
+            while proc.is_running():
+                print(".")
+                time.sleep(1)
+                waittime=waittime+1
+            '''
+            result = process.wait_for_result()
+            print(result.output)
+            print("wait search finish")
+            result = shell.run(["cat", "/proc/net/rtl88x2bu/wlan3/rate_search"])
+            while "=1" in result.decode():
+                print(".")
+                time.sleep(5)
+                result = shell.run(["cat", "/proc/net/rtl88x2bu/wlan3/rate_search"])
+            # 2. record rate_search_result, pathb_phase
+            result = shell.run(["cat", "/proc/net/rtl88x2bu/wlan3/rate_search_result"])
+            print("search_result: %s" % result)
+            result = shell.run(["cat", "/proc/net/rtl88x2bu/wlan3/pathb_phase"])
+            print("pathb_phase: %s" % result)
+        # 3. start throughput test (TODO: each att?)
+        # 4. loop 1~3 for 5 times
         
     @pyqtSlot()
     def start_threads(self):
@@ -497,10 +623,11 @@ class main(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     #check root
-    if not os.geteuid() == 0:
-        msg = "Please run as root or by sudo!!"
-        QMessageBox.question(None, 'Error', msg, QMessageBox.Ok , QMessageBox.Ok)
-        sys.exit(msg)
+    if platform.system() == "Linux":
+        if not os.geteuid() == 0:
+            msg = "Please run as root or by sudo!!"
+            QMessageBox.question(None, 'Error', msg, QMessageBox.Ok , QMessageBox.Ok)
+            sys.exit(msg)
 
     m = main()
     m.show()
