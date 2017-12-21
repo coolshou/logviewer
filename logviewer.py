@@ -668,7 +668,7 @@ class main(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     #check root
-    if platform.system() == "Linux":
+    if "Linux" in platform.system():
         if not os.geteuid() == 0:
             msg = "Please run as root or by sudo!!"
             QMessageBox.question(None, 'Error', msg, QMessageBox.Ok , QMessageBox.Ok)
