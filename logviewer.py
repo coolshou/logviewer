@@ -170,7 +170,7 @@ class main(QMainWindow):
         self.setWindowTitle("Thread logviewer")
         
         try:
-            self.att = attenuator(testMode=True)
+            self.att = attenuator(testMode=False)
         except  Exception as e:
             print("qRVR:%s" % str(e))
         
@@ -202,6 +202,7 @@ class main(QMainWindow):
         #
         self.pbDirectBF.clicked.connect(self.startDirectBF)
         self.pbEVPathSignal.clicked.connect(self.startEVPathSignal)
+        self.pbSaveEVPathSignal.clicked.connect(self.saveEVPathSignal)
         
         QThread.currentThread().setObjectName('main')  # threads can be named, useful for log output
         self.__workers_done = None
@@ -361,10 +362,39 @@ class main(QMainWindow):
         os.rename(self.syslogfile, "%s_%s" %(self.syslogfile, bakFile))
         #start rsyslog
         self.startRsyslog(True)
-    
+        
+    def saveEVPathSignal(self):
+        filename , _filter = QFileDialog.getSaveFileName(
+                self, 'Save File', '', 'CSV(*.csv)')
+        print("path: %s" % filename)
+        if filename is not "":
+            #self.log.append("#################save data###################")
+            with open(filename, 'w') as stream:
+                writer = csv.writer(stream, delimiter=',')
+                #header
+                hdata = []
+                for column in range(self.twSignal.columnCount()):
+                    itm = self.twSignal.horizontalHeaderItem(column)
+                    if itm is not None:
+                        hdata.append("%s" % itm.text())
+                writer.writerow(hdata)
+                for row in range(self.twSignal.rowCount()):
+                    rowdata = []
+                    for column in range(self.twSignal.columnCount()):
+                        item = self.twSignal.item(row, column)
+                        if item is not None:
+                            rowdata.append("%s" % item.text())
+                        else:
+                            rowdata.append('')
+                    #self.log.append("%s = %s" %(row, rowdata))
+                    writer.writerow(rowdata)
+                #self.log.append("rowdata: %s" % rowdata)
+                
     @pyqtSlot()
     def startEVPathSignal(self):
-        #self.addSignalResult(1,1,"123")
+        self.pbEVPathSignal.setEnabled(False)
+        self.pbSaveEVPathSignal.setEnabled(False)
+        #self.addSignalResult(0,0,"123")
         #return
         att1 = self.devices[0]
         att2 = self.devices[1]
@@ -372,7 +402,9 @@ class main(QMainWindow):
         ip = self.leIP.text()
         username = self.leUserName.text()
         password = self.lePassword.text()
-        shell = spur.SshShell(hostname=ip, username=username, password=password)
+        shell = spur.SshShell(hostname=ip, 
+                              username=username, password=password,
+                              missing_host_key=spur.ssh.MissingHostKey.accept)
         rssi_path = self.leRSSI.text()
         
         iRow = self.twAtt.rowCount()
@@ -406,29 +438,42 @@ class main(QMainWindow):
                     #get RSSI,SNR 10 times
                     for i in range(10):
                         result=""
-                        with shell:
-                            print("cat %s" % rssi_path)
-                            #result = shell.run(["cat", rssi_path])
-                        print("%s - %s: %s" % (vAtt1, vAtt2, result))
+                        #with shell:
+                        print("cat %s" % rssi_path)
+                        result = shell.run(["cat", rssi_path])
+                        #print("%s - %s: %s" % (vAtt1, vAtt2, result))
                         curRow = self.twSignal.rowCount()
-                        self.addSignalResult(curRow+1, 0, vAtt1)
-                        self.addSignalResult(curRow+1, 1, vAtt2)
+                        self.addSignalResult(curRow, 0, vAtt1)
+                        self.addSignalResult(curRow, 1, vAtt2)
                         #RSSI1, RSSI2, SNR1, SNR2
-                        self.addSignalResult(curRow+1, 2, result)
+                        if result.return_code == 0:
+                            rs = result.output.decode()
+                            r = rs.split(",")
+                            self.addSignalResult(curRow, 2, r[0])
+                            self.addSignalResult(curRow, 3, r[1])
+                            self.addSignalResult(curRow, 4, r[2])
+                            self.addSignalResult(curRow, 5, r[3].rsplit()[0])
+                        else:
+                            rs = result.stderr_output
+                            self.addSignalResult(curRow, 2, rs)
+                        
                         QApplication.processEvents()
                         time.sleep(1) #wait 1 sec
                     QApplication.processEvents()
                 QApplication.processEvents()
-                    
+        
+        self.pbEVPathSignal.setEnabled(True)
+        self.pbSaveEVPathSignal.setEnabled(True)
+        
     def addSignalResult(self, row, col, val):
         iRow = self.twSignal.rowCount()
-        if iRow < row:
-            self.twSignal.setRowCount(row)
+        if iRow <= row:
+            self.twSignal.setRowCount(row+1)
             
         itm = self.twSignal.item(row,col)
         if not itm:
             itm = QTableWidgetItem(0)
-            print("addSignalResult: %s = %s" % (itm,val))
+            #print("addSignalResult: %s = %s" % (itm,val))
             itm.setText(str(val))
         self.twSignal.setItem(row, col, itm)
             

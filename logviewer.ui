@@ -583,7 +583,7 @@
            <item>
             <widget class="QLineEdit" name="leRSSI">
              <property name="text">
-              <string>/proc/net/rtl88x2bu/wlanx/alpha_rssi</string>
+              <string>/proc/net/rtl88x2bu/wlan1/alpha_rx_signa</string>
              </property>
             </widget>
            </item>
@@ -596,6 +596,9 @@
            </item>
            <item>
             <widget class="QPushButton" name="pbSaveEVPathSignal">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
               <string>Save</string>
              </property>
@@ -682,22 +685,22 @@
           </column>
           <column>
            <property name="text">
-            <string>RSSI 1</string>
+            <string>RSSI1</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>RSSI 2</string>
+            <string>RSSI2</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>SNR 1</string>
+            <string>SNR1</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>SNR 2</string>
+            <string>SNR2</string>
            </property>
           </column>
          </widget>
