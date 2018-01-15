@@ -84,7 +84,8 @@ class log_viewer(QObject):
     TAIL = '/usr/bin/tail'
     #SYSLOG_FILE = '/var/log/syslog'
     
-    def __init__(self, idx: int, filename:str):
+    #def __init__(self, idx: int, filename:str):
+    def __init__(self, idx, filename):
         QThread.__init__(self)
         self.__id = idx
         self.syslog_file = filename
