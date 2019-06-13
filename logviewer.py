@@ -162,11 +162,17 @@ class main(QMainWindow):
     
     def __init__(self, Parent=None):
         super(main,self).__init__(Parent)
+        if getattr(sys, 'frozen', False):
+            # we are running in a |PyInstaller| bundle
+            basedir = sys._MEIPASS
+        else:
+            # we are running in a normal Python environment
+            basedir = os.path.dirname(__file__)
         self.settings = QSettings("logviewer.ini", QSettings.IniFormat)
         self.settings.setFallbacksEnabled(False)    # File only, not registry or or.
         
         self.syslogfile= os.path.join("/","var","log","syslog")
-        loadUi("logviewer.ui", self)
+        loadUi(os.path.join(basedir, "logviewer.ui"), self)
         
         self.setWindowTitle("Thread logviewer")
         
